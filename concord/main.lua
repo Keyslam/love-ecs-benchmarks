@@ -56,9 +56,7 @@ end
 function SpriteRenderer:draw()
    for i = 1, self.pool.size do
       local e = self.pool:get(i)
-   
       local position = e[Position]
-
       love.graphics.draw(self.sprite, position.x, position.y)
    end
 end
@@ -72,7 +70,7 @@ Game:addSystem(physics, "update")
 Game:addSystem(spriteRenderer, "draw")
 
 function love.update(dt)
-   for i = 1, 100 do
+   for _ = 1, 100 do
       local e = Concord.entity()
       :give(Position, 0, 0)
       :give(Velocity, love.math.random(10, 30), love.math.random(10, 30))
@@ -87,5 +85,5 @@ function love.update(dt)
 end
 
 function love.draw()
-   --Game:emit("draw")
+   Game:emit("draw")
 end
