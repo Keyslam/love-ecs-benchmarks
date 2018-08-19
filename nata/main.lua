@@ -68,7 +68,9 @@ function love.update(dt)
 	end
 	entities:call('update', dt)
 	entities:remove(removeCheck)
-	love.window.setTitle("FPS: " .. love.timer.getFPS() .. " Entities: " .. #entities._entities)
+	love.window.setTitle(" Entities: " .. #entities._entities
+      .. " | FPS: " .. love.timer.getFPS()
+      .. " | Memory: " .. math.floor(collectgarbage 'count') .. 'kb')
 end
 
 function love.draw()

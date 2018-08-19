@@ -85,7 +85,9 @@ function love.update(dt)
 
    Game:emit("update", dt)
 
-   love.window.setTitle("FPS: " ..love.timer.getFPS().. " Entities: " ..Game.entities.size)
+   love.window.setTitle(" Entities: " .. Game.entities.size
+      .. " | FPS: " .. love.timer.getFPS()
+      .. " | Memory: " .. math.floor(collectgarbage 'count') .. 'kb')
 end
 
 function love.draw()
