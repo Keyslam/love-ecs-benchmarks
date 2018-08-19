@@ -43,7 +43,7 @@ end
 local SpriteRenderer = Concord.system({Position, Sprite})
 function SpriteRenderer:init()
    self.sprite = love.graphics.newCanvas(16,16)
-   love.graphics.setCanvas(sprite)
+   love.graphics.setCanvas(self.sprite)
    love.graphics.setColor(1,1,1,1)
    love.graphics.circle("fill",8,8,6)
    love.graphics.setColor(0,0,0,1)
