@@ -1,5 +1,7 @@
 local Concord = require("concord").init()
 
+local entityLimit = 20000
+
 local Position = Concord.component(function(e, x, y)
    e.x = x
    e.y = y
@@ -71,11 +73,13 @@ Game:addSystem(spriteRenderer, "draw")
 
 function love.update(dt)
    for _ = 1, 100 do
+      if entityLimit and Game.entities.size >= entityLimit then
+        break
+      end
       local e = Concord.entity()
       :give(Position, 0, 0)
       :give(Velocity, love.math.random(10, 30), love.math.random(10, 30))
       :give(Sprite)
-
       Game:addEntity(e)
    end
 
