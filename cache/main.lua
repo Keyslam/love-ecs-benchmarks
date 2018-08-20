@@ -126,6 +126,6 @@ function love.draw()
       local id = SpriteRenderer.entities[i - 1]
       local position = Position.entities:get(id)
 
-      love.graphics.draw(sprite, position.x, position.y)
+      --love.graphics.draw(sprite, position.x, position.y)
    end
 end
