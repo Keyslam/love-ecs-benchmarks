@@ -1,6 +1,6 @@
 local Concord = require("concord").init()
 
-local entityLimit = 20000
+local entityLimit = 50000
 
 local Position = Concord.component(function(e, x, y)
    e.x = x
@@ -59,7 +59,7 @@ function SpriteRenderer:draw()
    for i = 1, self.pool.size do
       local e = self.pool:get(i)
       local position = e[Position]
-      love.graphics.draw(self.sprite, position.x, position.y)
+      --love.graphics.draw(self.sprite, position.x, position.y)
    end
 end
 

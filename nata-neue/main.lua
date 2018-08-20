@@ -1,4 +1,4 @@
-local entityLimit = 20000
+local entityLimit = 50000
 
 local sprite = love.graphics.newCanvas(16, 16)
 love.graphics.setCanvas(sprite)
@@ -47,7 +47,7 @@ local spriteRendererSystem = {
 	end,
 
 	draw = function(e)
-		love.graphics.draw(sprite, e.x, e.y)
+		--love.graphics.draw(sprite, e.x, e.y)
 	end,
 }
 
