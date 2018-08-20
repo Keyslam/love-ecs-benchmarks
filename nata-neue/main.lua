@@ -60,7 +60,7 @@ local removeCheck = function(e) return e.dead end
 
 function love.update(dt)
 	for _ = 1, 100 do
-		if entityLimit and #entities._entities >= entityLimit then
+		if entityLimit and entities:getSize() >= entityLimit then
 			break
 		end
 		entities:queue(createEntity())
@@ -68,7 +68,7 @@ function love.update(dt)
 	end
 	entities:call('update', dt)
 	entities:remove(removeCheck)
-	love.window.setTitle(" Entities: " .. #entities._entities
+	love.window.setTitle(" Entities: " .. entities:getSize()
       .. " | FPS: " .. love.timer.getFPS()
       .. " | Memory: " .. math.floor(collectgarbage 'count') .. 'kb')
 end
