@@ -118,7 +118,9 @@ function love.update(dt)
       end
    end
 
-   love.window.setTitle(love.timer.getFPS())
+   love.window.setTitle(" Entities: " .. nextID
+      .. " | FPS: " .. love.timer.getFPS()
+      .. " | Memory: " .. math.floor(collectgarbage 'count') .. 'kb')
 end
 
 function love.draw()
