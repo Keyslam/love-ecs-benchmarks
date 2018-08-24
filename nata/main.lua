@@ -1,4 +1,4 @@
-local entityLimit = 20000
+local entityLimit = 50000
 
 local sprite = love.graphics.newCanvas(16, 16)
 love.graphics.setCanvas(sprite)
@@ -47,7 +47,7 @@ local spriteRendererSystem = {
 	end,
 
 	draw = function(e)
-		love.graphics.draw(sprite, e.x, e.y)
+		--love.graphics.draw(sprite, e.x, e.y)
 	end,
 }
 
@@ -67,10 +67,11 @@ function love.update(dt)
 		entities:flush()
 	end
 	entities:call('update', dt)
-	entities:remove(removeCheck)
-	love.window.setTitle(" Entities: " .. #entities._entities
-      .. " | FPS: " .. love.timer.getFPS()
-      .. " | Memory: " .. math.floor(collectgarbage 'count') .. 'kb')
+
+		love.window.setTitle(" Entities: " .. #entities._entities
+.. " | FPS: " .. love.timer.getFPS()
+.. " | Memory: " .. math.floor(collectgarbage 'count') .. 'kb'
+.. " | Delta: " .. love.timer.getDelta())
 end
 
 function love.draw()
