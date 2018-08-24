@@ -1,5 +1,10 @@
 return {
 	std = 'lua51+love',
-	globals = {'love'},
+	globals = {
+		'entityLimit',
+		'enableDrawing',
+		'love',
+		'testSprite',
+	},
 	ignore = {'212'},
 }
