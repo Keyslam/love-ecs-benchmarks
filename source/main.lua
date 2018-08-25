@@ -22,6 +22,10 @@ function love.update(dt)
 .. " | Delta: " .. love.timer.getDelta())
 end
 
+function love.keypressed(key)
+	if key == 'escape' then love.event.quit() end
+end
+
 function love.draw()
 	test.draw()
 end
