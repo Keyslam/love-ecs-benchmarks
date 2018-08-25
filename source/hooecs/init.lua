@@ -1,9 +1,7 @@
-local HooECS = require("hooECS")
+local HooECS = require("hooecs.hooECS")
 HooECS.initialize({
    globals = true,
 })
-
-local entityLimit = 50000
 
 local Position = Component.create("Position", {"x", "y"}, {x = 0, y = 0})
 local Velocity = Component.create("Velocity", {"x", "y"}, {x = 0, y = 0})
@@ -49,8 +47,9 @@ local SpriteRenderer = class("SpriteRenderer")
 function SpriteRenderer:update(dt)
    for _, e in pairs(self.targets) do
       local position = e:get("Position")
-
-      -- love.graphics.draw(something something)
+      if enableDrawing then
+            love.graphics.draw(testSprite, position.x, position.y)
+      end
    end
 end
 
@@ -60,30 +59,27 @@ end
 
 Game:addSystem(Physics())
 
-function love.update(dt)
-   for _ = 1, 100 do
-      if entityLimit and eCount >= entityLimit then
-         break
+return {
+   update = function(dt)
+      for _ = 1, 100 do
+            if entityLimit and eCount >= entityLimit then
+                  break
+            end
+
+            local e = Entity()
+            e:add(Position())
+            e:add(Velocity(love.math.random(10, 30), love.math.random(10, 30)))
+            e:add(Sprite())
+
+            Game:addEntity(e)
+
+            eCount = eCount + 1
       end
 
-      local e = Entity()
-      e:add(Position())
-      e:add(Velocity(love.math.random(10, 30), love.math.random(10, 30)))
-      e:add(Sprite())
+      Game:update(dt)
+   end,
 
-      Game:addEntity(e)
+   draw = function() Game:draw() end,
 
-      eCount = eCount + 1
-   end
-
-   Game:update(dt)
-
-   love.window.setTitle(" Entities: " .. eCount
-      .. " | FPS: " .. love.timer.getFPS()
-      .. " | Memory: " .. math.floor(collectgarbage 'count') .. 'kb'
-      .. " | Delta: " .. love.timer.getDelta())
-end
-
-function love.draw()
-   Game:draw()
-end
+   getNumEntities = function() return eCount end,
+}

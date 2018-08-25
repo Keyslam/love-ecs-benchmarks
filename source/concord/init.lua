@@ -1,6 +1,4 @@
-local Concord = require("concord").init()
-
-local entityLimit = 50000
+local Concord = require("concord.concord").init()
 
 local Position = Concord.component(function(e, x, y)
    e.x = x
@@ -44,22 +42,15 @@ end
 
 local SpriteRenderer = Concord.system({Position, Sprite})
 function SpriteRenderer:init()
-   self.sprite = love.graphics.newCanvas(16,16)
-   love.graphics.setCanvas(self.sprite)
-   love.graphics.setColor(1,1,1,1)
-   love.graphics.circle("fill",8,8,6)
-   love.graphics.setColor(0,0,0,1)
-   love.graphics.circle("line",8,8,6)
-   love.graphics.circle("line",10,8,1)
-   love.graphics.setCanvas()
-   love.graphics.setColor(1,1,1,1)
 end
 
 function SpriteRenderer:draw()
    for i = 1, self.pool.size do
       local e = self.pool:get(i)
       local position = e[Position]
-      --love.graphics.draw(self.sprite, position.x, position.y)
+      if enableDrawing then
+        love.graphics.draw(testSprite, position.x, position.y)
+      end
    end
 end
 
@@ -71,8 +62,9 @@ local spriteRenderer = SpriteRenderer()
 Game:addSystem(physics, "update")
 Game:addSystem(spriteRenderer, "draw")
 
-function love.update(dt)
-   for _ = 1, 100 do
+return {
+  update = function(dt)
+    for _ = 1, 100 do
       if entityLimit and Game.entities.size >= entityLimit then
         break
       end
@@ -84,13 +76,11 @@ function love.update(dt)
    end
 
    Game:emit("update", dt)
+  end,
 
-   love.window.setTitle(" Entities: " .. Game.entities.size
-   .. " | FPS: " .. love.timer.getFPS()
-   .. " | Memory: " .. math.floor(collectgarbage 'count') .. 'kb'
-   .. " | Delta: " .. love.timer.getDelta())
-end
+  draw = function()
+    Game:emit("draw")
+  end,
 
-function love.draw()
-   Game:emit("draw")
-end
+  getNumEntities = function() return Game.entities.size end,
+}

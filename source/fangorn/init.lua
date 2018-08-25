@@ -347,60 +347,48 @@ local sprite = fangorn.Branch.new("sprite", {position}, function() return {} end
 
 local maxX
 local maxY
-local spriteCanvas
 
 function love.load(args)
     maxX = love.graphics.getWidth()
     maxY = love.graphics.getHeight()
-
-    spriteCanvas = love.graphics.newCanvas(16, 16)
-    love.graphics.setCanvas(spriteCanvas)
-    love.graphics.setColor(1, 1, 1, 1)
-    love.graphics.circle("fill", 8, 8, 6)
-    love.graphics.setColor(0, 0, 0, 1)
-    love.graphics.circle("line", 8, 8, 6)
-    love.graphics.circle("line", 10, 8, 1)
-
-    love.graphics.setCanvas()
-    love.graphics.setColor(1, 1, 1, 1)
 end
 
-function love.update(dt)
-    for _ = 1, 100 do
-        if entityLimit and #position:ents() >= entityLimit then
-            break
+return {
+    update = function(dt)
+        for _ = 1, 100 do
+            if entityLimit and #position:ents() >= entityLimit then
+                break
+            end
+            local e = fangorn.Ent.new()
+            e:grow(velocity, {x = love.math.random(10, 30), y = love.math.random(10, 30)})
+            e:grow(sprite)
         end
-        local e = fangorn.Ent.new()
-        e:grow(velocity, {x = love.math.random(10, 30), y = love.math.random(10, 30)})
-        e:grow(sprite)
-    end
 
-    for _, e in ipairs(velocity:ents()) do
-        local pos = e:get(position)
-        local vel = e:get(velocity)
-        pos.x = pos.x + vel.x * dt
-        pos.y = pos.y + vel.y * dt
+        for _, e in ipairs(velocity:ents()) do
+            local pos = e:get(position)
+            local vel = e:get(velocity)
+            pos.x = pos.x + vel.x * dt
+            pos.y = pos.y + vel.y * dt
 
-        if pos.x > maxX or pos.y > maxY then
-            if love.math.random() < 0.4 then
-                e:kill()
-            else
-                pos.x = 0
-                pos.y = 0
+            if pos.x > maxX or pos.y > maxY then
+                if love.math.random() < 0.4 then
+                    e:kill()
+                else
+                    pos.x = 0
+                    pos.y = 0
+                end
             end
         end
-    end
+    end,
 
+    draw = function()
+        for _, e in ipairs(sprite:ents()) do
+            local pos = e:get(position)
+            if enableDrawing then
+                love.graphics.draw(testSprite, pos.x, pos.y)
+            end
+        end
+    end,
 
-   love.window.setTitle(" Entities: " .. #position:ents()
-   .. " | FPS: " .. love.timer.getFPS()
-   .. " | Memory: " .. math.floor(collectgarbage 'count') .. 'kb'
-   .. " | Delta: " .. love.timer.getDelta())
-end
-
-function love.draw()
-    for _, e in ipairs(sprite:ents()) do
-        local pos = e:get(position)
-        love.graphics.draw(spriteCanvas, pos.x, pos.y)
-    end
-end
+    getNumEntities = function() return #position:ents() end,
+}

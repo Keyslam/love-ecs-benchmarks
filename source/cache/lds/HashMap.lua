@@ -23,8 +23,8 @@ Conventions:
 --]]
 
 
-local lds = require 'lds/hash'
-require 'lds/Vector'
+local lds = require 'cache.lds.hash'
+require 'cache.lds.Vector'
 
 local ffi = require 'ffi'
 local C = ffi.C

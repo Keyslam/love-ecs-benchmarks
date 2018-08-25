@@ -7,11 +7,11 @@ lds - LuaJIT Data Structures
 Common module require for convenience.
 
 Individual data structures may be require'd instead, for example:
-local lds = require 'lds/Vector'
+local lds = require 'cache.lds.Vector'
 --]]
 
-local lds = require 'lds/Array'
-require 'lds/Vector'
-require 'lds/HashMap'
+local lds = require 'cache.lds.Array'
+require 'cache.lds.Vector'
+require 'cache.lds.HashMap'
 
 return lds
