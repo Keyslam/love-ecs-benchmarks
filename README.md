@@ -20,9 +20,15 @@ Otherwise they return to the 0, 0 position.
 Each library is completely different, so this simple test gives us a broad result of how each library performs in a simple real life scenario.
 Take these results with a grain of salt, and also take features in consideration.
 
-# Results
+## Running
+To run the tests, do
 ```
-50000 Entities
+lovec source [library] [entityLimit] [enableDrawing]
+```
+where `[library]` is the name of the library you want to test, `[entityLimit]` is the max number of entities to process at once (optional, defaults to `50,000`), and `[enableDrawing]` sets whether to draw sprites or not (optional, defaults to `false`).
+
+## Results
+```
 50000 Entities
 
 Concord:
@@ -55,3 +61,6 @@ Cache:
  Min memory usage: 0.9 MB
  Peak memory usage: 1.4 MB
 ```
+
+## Contributing
+Feel free to add your own ECS library to the list, add features, or change the tests to be more idiomatic for their respective libraries.
