@@ -1,6 +1,6 @@
 local library = arg[2]
-entityLimit = arg[3] or 50000
-enableDrawing = arg[4]
+entityLimit = tonumber(arg[3]) or 50000
+enableDrawing = arg[4] == 'true'
 
 testSprite = love.graphics.newCanvas(16, 16)
 love.graphics.setCanvas(testSprite)
