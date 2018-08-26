@@ -1,0 +1,3 @@
+[submodule "source/naw/naw"]
+	path = source/naw/naw
+	url = https://github.com/pfirsich/naw.git
