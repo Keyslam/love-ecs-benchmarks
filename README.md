@@ -50,8 +50,8 @@ HooECS:
  Peak memory usage: 48.8 MB
 
 Fangorn:
- Iteration: 0.0151 FPS.
- Removal: 0.0238 FPS.
+ Iteration: 0.0151 Seconds.
+ Removal: 0.0238 Seconds.
  Min memory usage: 39.1 MB
  Peak memory usage: 97.7 MB
  
