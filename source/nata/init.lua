@@ -11,34 +11,39 @@ end
 local maxX, maxY = love.graphics.getWidth(), love.graphics.getHeight()
 
 local physicsSystem = {
-	filter = function(e)
-		return e.x and e.y and e.vx and e.vy
-	end,
+	filter = {'x', 'y', 'vx', 'vy'},
 
-	update = function(e, dt)
-		e.x = e.x + e.vx * dt
-		e.y = e.y + e.vy * dt
-		if e.x > maxX or e.y > maxY then
-			if love.math.random() < .4 then
-				e.dead = true
-			else
-				e.x = 0
-				e.y = 0
+	process = {
+		update = function(self, dt)
+			for _, e in ipairs(self.entities) do
+				e.x = e.x + e.vx * dt
+				e.y = e.y + e.vy * dt
+				if e.x > maxX or e.y > maxY then
+					if love.math.random() < .4 then
+						e.dead = true
+					else
+						e.x = 0
+						e.y = 0
+					end
+				end
 			end
-		end
-	end,
+		end,
+	},
 }
 
 local spriteRendererSystem = {
-	filter = function(e)
-		return e.x and e.y and e.sprite
-	end,
+	filter = {'x', 'y', 'sprite'},
 
-	draw = function(e)
-		if enableDrawing then
-			love.graphics.draw(testSprite, e.x, e.y)
-		end
-	end,
+	process = {
+		draw = function(self)
+			for _, e in ipairs(self.entities) do
+				if enableDrawing then
+					love.graphics.draw(testSprite, e.x, e.y)
+				end
+			end
+		end,
+	}
+
 }
 
 local entities = require 'nata.nata'.new {
@@ -51,21 +56,21 @@ local removeCheck = function(e) return e.dead end
 return {
 	update = function(dt)
 		for _ = 1, 100 do
-			if entityLimit and entities:getSize() >= entityLimit then
+			if entityLimit and #entities.entities >= entityLimit then
 				break
 			end
 			entities:queue(createEntity())
 			entities:flush()
 		end
-		entities:call('update', dt)
+		entities:process('update', dt)
 		entities:remove(removeCheck)
 	end,
 
 	draw = function()
-		entities:call 'draw'
+		entities:process 'draw'
 	end,
 
 	getNumEntities = function()
-		return entities:getSize()
+		return #entities.entities
 	end,
 }
