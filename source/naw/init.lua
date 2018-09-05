@@ -31,7 +31,7 @@ function physicsSystem(world, dt)
 
         if pos.x > maxX or pos.y > maxY then
             if love.math.random() < 0.4 then
-                world:removeEntity(entity)
+                entity:destroy()
             else
                 pos.x, pos.y = 0, 0
             end
