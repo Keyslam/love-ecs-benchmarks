@@ -24,7 +24,7 @@ function spriteRenderer:draw()
 	end
 end
 
-local world = require 'nata.nata'.new {
+local world = require 'nata-experimental.nata'.new {
 	groups = {
 		velocity = {filter = {'x', 'y', 'vx', 'vy'}},
 		sprite = {filter = {'x', 'y', 'sprite'}},
