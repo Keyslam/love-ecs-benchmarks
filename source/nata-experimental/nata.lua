@@ -27,68 +27,41 @@ local nata = {
 	]]
 }
 
-local Collection = {}
-Collection.__index = Collection
+-- based on the list class from Concord
+-- https://github.com/Tjakka5/Concord/blob/dev/src/list.lua
+local List = {}
+List.__index = List
 
-function Collection:add(item)
-	local index
-	if #self._holes > 0 then
-		index = self._holes[#self._holes]
-		self._holes[#self._holes] = nil
+function List:_add(item)
+	-- add the item to the end of the array part
+	self[#self + 1] = item
+	-- map the item to its index in the array
+	self[item] = #self
+end
+
+function List:_remove(item)
+	local index = self[item]
+	if index == #self then
+		-- if the item is the last item in the array, just remove it
+		self[index] = nil
 	else
-		index = self._highestIndex + 1
-		self._highestIndex = self._highestIndex + 1
+		-- otherwise, move the last item in the array into the gap
+		local lastItem = self[#self]
+		self[index] = lastItem
+		self[#self] = nil
+		self[lastItem] = index
 	end
-	self._items[index] = item
-	self._itemIndices[item] = index
+	-- remove the item from the map
+	self[item] = nil
 end
 
-function Collection:remove(item)
-	local index = self._itemIndices[item]
-	self._items[index] = nil
-	self._itemIndices[item] = nil
-	if index == self._highestIndex then
-		self._highestIndex = self._highestIndex - 1
-	else
-		self._holes[#self._holes + 1] = index
-	end
-end
-
-local function collectionIterator(collection, i)
-	repeat
-		i = i + 1
-		if i > collection._highestIndex then return end
-	until collection._items[i]
-	return i, collection._items[i]
-end
-
-function Collection:items()
-	return collectionIterator, self, 0
-end
-
-function Collection:has(item)
-	return self._itemIndices[item] and true or false
-end
-
-function Collection:count()
-	return self._highestIndex - #self._holes
-end
-
-local function newCollection()
-	return setmetatable({
-		_items = {},
-		_itemIndices = {},
-		_holes = {},
-		_highestIndex = 0,
-	}, Collection)
+local function newList()
+	return setmetatable({}, List)
 end
 
 local function removeByValue(t, v)
-	for i, item in ipairs(t) do
-		if item == v then
-			table.remove(t, i)
-			break
-		end
+	for i = #t, 1, -1 do
+		if t[i] == v then table.remove(t, i) end
 	end
 end
 
@@ -108,13 +81,13 @@ local function filterEntity(entity, filter)
 	return true
 end
 
-local World = {}
-World.__index = World
+local Pool = {}
+Pool.__index = Pool
 
-function World:_init(options, ...)
+function Pool:_init(options, ...)
 	options = options or {}
 	self._queue = {}
-	self.entities = newCollection()
+	self.entities = newList()
 	self.groups = {}
 	self._systems = {}
 	self._events = {}
@@ -125,54 +98,54 @@ function World:_init(options, ...)
 		self.groups[groupName] = {
 			filter = groupOptions.filter,
 			sort = groupOptions.sort,
-			entities = newCollection(),
-			hasEntity = {},
+			entities = newList(),
 		}
 	end
 	for _, systemDefinition in ipairs(systems) do
 		local system = setmetatable({
-			world = self,
+			pool = self,
 		}, {__index = systemDefinition})
 		table.insert(self._systems, system)
 	end
 	self:emit('init', ...)
 end
 
-function World:_addToGroup(groupName, entity)
+function Pool:_addToGroup(groupName, entity)
 	local group = self.groups[groupName]
-	group.entities:add(entity)
+	group.entities:_add(entity)
 	self:emit('addToGroup', groupName, entity)
 end
 
-function World:_removeFromGroup(groupName, entity)
+function Pool:_removeFromGroup(groupName, entity)
 	local group = self.groups[groupName]
-	group.entities:remove(entity)
+	group.entities:_remove(entity)
 	self:emit('removeFromGroup', groupName, entity)
 end
 
-function World:queue(entity)
+function Pool:queue(entity)
 	table.insert(self._queue, entity)
 	return entity
 end
 
-function World:flush()
+function Pool:flush()
 	for i = 1, #self._queue do
 		local entity = self._queue[i]
 		-- check if the entity belongs in each group and
 		-- add it to/remove it from the group as needed
 		for groupName, group in pairs(self.groups) do
 			if filterEntity(entity, group.filter) then
-				if not group.entities:has(entity) then
+				if not group.entities[entity] then
 					self:_addToGroup(groupName, entity)
 				end
 				if group.sort then group._needsResort = true end
-			elseif group.entities:has(entity) then
+			elseif group.entities[entity] then
 				self:_removeFromGroup(groupName, entity)
 			end
 		end
-		-- add the entity to the world if it hasn't been added already
-		if not self.entities:has(entity) then
-			self.entities:add(entity)
+		-- add the entity to the pool if it hasn't been added already
+		if not self.entities[entity] then
+			table.insert(self.entities, entity)
+			self.entities[entity] = true
 			self:emit('add', entity)
 		end
 		self._queue[i] = nil
@@ -180,39 +153,41 @@ function World:flush()
 	-- re-sort groups
 	for _, group in pairs(self.groups) do
 		if group._needsResort then
-			--table.sort(group.entities, group.sort)
+			table.sort(group.entities, group.sort)
 			group._needsResort = nil
 		end
 	end
 end
 
-function World:remove(f)
-	for _, entity in self.entities:items() do
+function Pool:remove(f)
+	for i = #self.entities, 1, -1 do
+		local entity = self.entities[i]
 		if f(entity) then
 			self:emit('remove', entity)
 			for groupName, group in pairs(self.groups) do
-				if group.entities:has(entity) then
+				if group.entities[entity] then
 					self:_removeFromGroup(groupName, entity)
 				end
 			end
-			self.entities:remove(entity)
+			table.remove(self.entities, i)
+			self.entities[entity] = nil
 		end
 	end
 end
 
-function World:on(event, f)
+function Pool:on(event, f)
 	self._events[event] = self._events[event] or {}
 	table.insert(self._events[event], f)
 	return f
 end
 
-function World:off(event, f)
+function Pool:off(event, f)
 	if self._events[event] then
 		removeByValue(self._events[event], f)
 	end
 end
 
-function World:emit(event, ...)
+function Pool:emit(event, ...)
 	for _, system in ipairs(self._systems) do
 		if type(system[event]) == 'function' then
 			system[event](system, ...)
@@ -225,7 +200,7 @@ function World:emit(event, ...)
 	end
 end
 
-function World:getSystem(systemDefinition)
+function Pool:getSystem(systemDefinition)
 	for _, system in ipairs(self._systems) do
 		if getmetatable(system).__index == systemDefinition then
 			return system
@@ -258,13 +233,13 @@ function nata.oop(options)
 					local entities
 					-- not using ternary here because if the group doesn't exist,
 					-- i'd rather it cause an error than just silently falling back
-					-- to the main entity world
+					-- to the main entity pool
 					if group then
-						entities = self.world.groups[group].entities
+						entities = self.pool.groups[group].entities
 					else
-						entities = self.world.entities
+						entities = self.pool.entities
 					end
-					for _, entity in entities:items() do
+					for _, entity in ipairs(entities) do
 						if type(entity[event]) == 'function' then
 							entity[event](entity, ...)
 						end
@@ -277,9 +252,9 @@ function nata.oop(options)
 end
 
 function nata.new(...)
-	local world = setmetatable({}, World)
-	world:_init(...)
-	return world
+	local pool = setmetatable({}, Pool)
+	pool:_init(...)
+	return pool
 end
 
 return nata

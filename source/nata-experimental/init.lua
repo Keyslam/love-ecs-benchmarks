@@ -1,7 +1,7 @@
 local physics = {}
 
 function physics:update(dt)
-	for _, e in self.world.groups.velocity.entities:items() do
+	for _, e in ipairs(self.pool.groups.velocity.entities) do
 		e.x = e.x + e.vx * dt
 		e.y = e.y + e.vy * dt
 		if e.x > love.graphics.getWidth() or e.y > love.graphics.getHeight() then
@@ -19,12 +19,12 @@ local spriteRenderer = {}
 
 function spriteRenderer:draw()
 	if not enableDrawing then return end
-	for _, e in self.world.groups.sprite.entities:items() do
+	for _, e in ipairs(self.pool.groups.sprite.entities) do
 		love.graphics.draw(testSprite, e.x, e.y)
 	end
 end
 
-local world = require 'nata-experimental.nata'.new {
+local pool = require 'nata-experimental.nata'.new {
 	groups = {
 		velocity = {filter = {'x', 'y', 'vx', 'vy'}},
 		sprite = {filter = {'x', 'y', 'sprite'}},
@@ -41,10 +41,10 @@ local nataDemo = {}
 
 function nataDemo.update(dt)
 	for _ = 1, 100 do
-		if entityLimit and world.entities:count() > entityLimit then
+		if entityLimit and #pool.entities > entityLimit then
 			break
 		end
-		world:queue {
+		pool:queue {
 			x = 0,
 			y = 0,
 			vx = love.math.random(10, 30),
@@ -52,17 +52,17 @@ function nataDemo.update(dt)
 			sprite = true,
 		}
 	end
-	world:flush()
-	world:emit('update', dt)
-	world:remove(removeCondition)
+	pool:flush()
+	pool:emit('update', dt)
+	pool:remove(removeCondition)
 end
 
 function nataDemo.draw()
-	world:emit 'draw'
+	pool:emit 'draw'
 end
 
 function nataDemo.getNumEntities()
-	return world.entities:count()
+	return #pool.entities
 end
 
 return nataDemo
