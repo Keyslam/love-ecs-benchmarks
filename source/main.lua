@@ -16,6 +16,7 @@ local test = require(library)
 
 function love.update(dt)
 	test.update(dt)
+	collectgarbage()
 	love.window.setTitle(" Entities: " .. test.getNumEntities()
 .. " | FPS: " .. love.timer.getFPS()
 .. " | Memory: " .. math.floor(collectgarbage 'count') .. 'kb'
